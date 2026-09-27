@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ScholarConnect — Your gateway to government scholarships. Authenticate, verify, and apply for scholarships seamlessly." />
+  <title>ScholarConnect — Government Scholarship Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="logo.jpg" type="image/jpeg" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ========== Top Bar ========== -->
+  <header class="top-bar" id="topBar">
+    <img src="logo.jpg" alt="ScholarConnect" class="logo-img" />
+    <div class="top-bar-text">
+      <span class="app-title">ScholarConnect</span>
+      <span class="app-subtitle">Government Scholarship Portal</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+      <a href="scholarconnect.zip" download="scholarconnect.zip" class="back-btn" title="Download Source Code (.zip)" aria-label="Download Project ZIP" style="text-decoration: none; font-size: 0.95rem;">📥</a>
+      <button class="back-btn hidden" id="globalBackBtn" title="Go Back" aria-label="Go back">←</button>
+    </div>
+  </header>
+
+  <!-- ========== Progress Bar ========== -->
+  <nav class="progress-bar-container" id="progressBar" aria-label="Application Progress">
+    <div class="progress-steps">
+      <!-- Step 1 -->
+      <div class="progress-step active" data-step="1">
+        <div class="step-circle">
+          <span class="step-number">1</span>
+          <span class="step-icon">✓</span>
+          <span class="step-label">Login</span>
+        </div>
+        <div class="step-line"></div>
+      </div>
+      <!-- Step 2 -->
+      <div class="progress-step" data-step="2">
+        <div class="step-circle">
+          <span class="step-number">2</span>
+          <span class="step-icon">✓</span>
+          <span class="step-label">Profile</span>
+        </div>
+        <div class="step-line"></div>
+      </div>
+      <!-- Step 3 -->
+      <div class="progress-step" data-step="3">
+        <div class="step-circle">
+          <span class="step-number">3</span>
+          <span class="step-icon">✓</span>
+          <span class="step-label">Eligibility</span>
+        </div>
+        <div class="step-line"></div>
+      </div>
+      <!-- Step 4 -->
+      <div class="progress-step" data-step="4">
+        <div class="step-circle">
+          <span class="step-number">4</span>
+          <span class="step-icon">✓</span>
+          <span class="step-label">Apply</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 1: Login & OTP Authentication                         -->
+  <!-- ============================================================ -->
+  <section class="screen active" id="screenLogin" aria-labelledby="loginHeading">
+    <div class="login-hero">
+      <img src="logo.jpg" alt="ScholarConnect Logo" class="login-logo" />
+      <h1 id="loginHeading">Welcome to ScholarConnect</h1>
+      <p>Discover and apply for government scholarships with verified credentials.</p>
+    </div>
+
+    <div class="login-card">
+      <div class="section-badge navy">
+        <span class="badge-icon">🔐</span>
+        Secure Login
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group" id="phoneGroup">
+        <label class="form-label" for="phoneInput">Mobile Number <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <span class="input-prefix">+91</span>
+          <input
+            type="tel"
+            id="phoneInput"
+            class="form-input has-prefix"
+            placeholder="Enter 10-digit mobile number"
+            maxlength="10"
+            inputmode="numeric"
+            pattern="[0-9]{10}"
+            autocomplete="tel"
+          />
+        </div>
+        <div class="form-error" id="phoneError">Please enter a valid 10-digit mobile number.</div>
+      </div>
+
+      <button class="btn btn-primary" id="sendOtpBtn">
+        Send OTP
+      </button>
+
+      <!-- OTP Section -->
+      <div class="otp-section" id="otpSection">
+        <div class="otp-sent-info" id="otpSentInfo">
+          <span>💬 OTP sent to <strong>+91 <span id="displayPhone"></span></strong></span>
+          <button type="button" class="btn-link" id="changePhoneBtn">Change</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="otpInputs">Enter 6-Digit OTP</label>
+          <div class="otp-inputs" id="otpInputs">
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="0" aria-label="OTP digit 1" />
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="1" aria-label="OTP digit 2" />
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="2" aria-label="OTP digit 3" />
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="3" aria-label="OTP digit 4" />
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="4" aria-label="OTP digit 5" />
+            <input type="tel" class="otp-input" maxlength="1" inputmode="numeric" data-index="5" aria-label="OTP digit 6" />
+          </div>
+          <div class="form-error" id="otpError">Invalid OTP. Please try again.</div>
+          <div class="otp-timer" id="otpTimer">
+            Resend OTP in <strong id="otpCountdown">30s</strong>
+          </div>
+        </div>
+
+        <button class="btn btn-saffron" id="verifyOtpBtn">
+          Verify & Continue
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SMS Push Banner Container -->
+  <div class="sms-banner-container" id="smsBannerContainer" aria-live="polite"></div>
+
+  <!-- ============================================================ -->
+  <!-- DIGILOCKER CONSENT MODAL                                     -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="digilockerModal">
+    <div class="modal-box">
+      <div class="modal-icon">🔗</div>
+      <h3>Connect to DigiLocker</h3>
+      <p>ScholarConnect will securely fetch your verified profile data from DigiLocker. Your data is encrypted and never shared with third parties.</p>
+      <div class="digilocker-badge" style="margin: 0 auto var(--space-6); width: fit-content;">
+        <span class="digi-icon">🏛️</span>
+        DigiLocker Verified
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="digilockerCancel">Cancel</button>
+        <button class="btn btn-primary" id="digilockerConsent" style="width:auto; flex:1;">Allow Access</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 2: Student Profile (Auto-Filled)                      -->
+  <!-- ============================================================ -->
+  <section class="screen" id="screenProfile" aria-labelledby="profileHeading">
+
+    <!-- Verified Banner -->
+    <div class="verified-banner">
+      <div class="verified-icon">✓</div>
+      <div class="verified-text">
+        <h4>DigiLocker Verified</h4>
+        <p>Profile data fetched from your DigiLocker account</p>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="section-card fade-in-up delay-1">
+      <div class="section-badge navy">
+        <span class="badge-icon">👤</span>
+        Personal Information
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fullName">Full Name</label>
+        <input type="text" id="fullName" class="form-input" readonly />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="fatherName">Father's Name</label>
+          <input type="text" id="fatherName" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="motherName">Mother's Name</label>
+          <input type="text" id="motherName" class="form-input" readonly />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="personalMobile">Personal Mobile</label>
+        <input type="tel" id="personalMobile" class="form-input" readonly />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="fatherMobile">Father's Mobile</label>
+          <input type="tel" id="fatherMobile" class="form-input" placeholder="Enter number" maxlength="10" inputmode="numeric" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="motherMobile">Mother's Mobile</label>
+          <input type="tel" id="motherMobile" class="form-input" placeholder="Enter number" maxlength="10" inputmode="numeric" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="guardianMobile">Guardian Mobile</label>
+        <input type="tel" id="guardianMobile" class="form-input" placeholder="Enter guardian number" maxlength="10" inputmode="numeric" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="dob">Date of Birth</label>
+          <input type="text" id="dob" class="form-input" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gender">Gender</label>
+          <input type="text" id="gender" class="form-input" readonly />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="category">Category</label>
+          <select id="category" class="form-select">
+            <option value="">Select</option>
+            <option value="General">General</option>
+            <option value="OBC">OBC</option>
+            <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="EWS">EWS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="familyIncome">Annual Income (₹)</label>
+          <input type="number" id="familyIncome" class="form-input" placeholder="e.g. 250000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="educationLevel">Education Level</label>
+          <select id="educationLevel" class="form-select">
+            <option value="">Select</option>
+            <option value="10th">10th Pass</option>
+            <option value="12th">12th Pass</option>
+            <option value="UG">Under Graduate</option>
+            <option value="PG">Post Graduate</option>
+            <option value="PhD">PhD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="percentage">Academic %</label>
+          <input type="number" id="percentage" class="form-input" placeholder="e.g. 85.5" step="0.1" min="0" max="100" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Address Details -->
+    <div class="section-card fade-in-up delay-2">
+      <div class="section-badge saffron">
+        <span class="badge-icon">🏠</span>
+        Address Details
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="currentAddress">Current Address <span class="required">*</span></label>
+        <textarea id="currentAddress" class="form-textarea" placeholder="Enter current address"></textarea>
+      </div>
+
+      <div class="address-toggle">
+        <input type="checkbox" id="sameAddress" />
+        <label for="sameAddress">Same as current address</label>
+      </div>
+
+      <div class="form-group" id="permanentAddressGroup">
+        <label class="form-label" for="permanentAddress">Permanent Address <span class="required">*</span></label>
+        <textarea id="permanentAddress" class="form-textarea" placeholder="Enter permanent address"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="state">State <span class="required">*</span></label>
+        <select id="state" class="form-select">
+          <option value="">Select State</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+          <option value="Assam">Assam</option>
+          <option value="Bihar">Bihar</option>
+          <option value="Chhattisgarh">Chhattisgarh</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Goa">Goa</option>
+          <option value="Gujarat">Gujarat</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Himachal Pradesh">Himachal Pradesh</option>
+          <option value="Jharkhand">Jharkhand</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Kerala">Kerala</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Manipur">Manipur</option>
+          <option value="Meghalaya">Meghalaya</option>
+          <option value="Mizoram">Mizoram</option>
+          <option value="Nagaland">Nagaland</option>
+          <option value="Odisha">Odisha</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Sikkim">Sikkim</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Tripura">Tripura</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Uttarakhand">Uttarakhand</option>
+          <option value="West Bengal">West Bengal</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Document Upload Section -->
+    <div class="section-card fade-in-up delay-3">
+      <div class="section-badge green">
+        <span class="badge-icon">📎</span>
+        Document Upload
+      </div>
+      <p class="section-desc">Upload the following documents in PDF or Image format (max 5 MB each).</p>
+
+      <!-- 10th Marksheet -->
+      <div class="doc-upload-card" id="doc10th" data-doc="marksheet10">
+        <input type="file" id="file10th" accept=".pdf,.jpg,.jpeg,.png" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">10th Marksheet</div>
+        <div class="upload-hint">PDF or Image • Max 5 MB</div>
+        <div class="upload-status"><span>✓</span> Uploaded</div>
+        <button class="remove-btn" title="Remove" aria-label="Remove file">✕</button>
+      </div>
+
+      <!-- 12th Marksheet -->
+      <div class="doc-upload-card" id="doc12th" data-doc="marksheet12">
+        <input type="file" id="file12th" accept=".pdf,.jpg,.jpeg,.png" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">12th Marksheet</div>
+        <div class="upload-hint">PDF or Image • Max 5 MB</div>
+        <div class="upload-status"><span>✓</span> Uploaded</div>
+        <button class="remove-btn" title="Remove" aria-label="Remove file">✕</button>
+      </div>
+
+      <!-- Caste Certificate -->
+      <div class="doc-upload-card" id="docCaste" data-doc="casteCert">
+        <input type="file" id="fileCaste" accept=".pdf,.jpg,.jpeg,.png" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Caste Certificate <span style="font-size:0.72rem;color:var(--text-muted)">(if applicable)</span></div>
+        <div class="upload-hint">PDF or Image • Max 5 MB</div>
+        <div class="upload-status"><span>✓</span> Uploaded</div>
+        <button class="remove-btn" title="Remove" aria-label="Remove file">✕</button>
+      </div>
+
+      <!-- Identity Proof -->
+      <div class="section-badge navy" style="margin-top:var(--space-5)">
+        <span class="badge-icon">🪪</span>
+        Identity Proof
+      </div>
+      <p class="section-desc">Select one form of identity and upload the document.</p>
+
+      <div class="id-proof-selector" id="idProofSelector">
+        <div class="id-chip selected" data-id="aadhaar">Aadhaar Card</div>
+        <div class="id-chip" data-id="passport">Passport</div>
+        <div class="id-chip" data-id="birth-cert">Birth Certificate</div>
+      </div>
+
+      <div class="doc-upload-card" id="docIdProof" data-doc="idProof">
+        <input type="file" id="fileIdProof" accept=".pdf,.jpg,.jpeg,.png" />
+        <div class="upload-icon">🪪</div>
+        <div class="upload-title" id="idProofTitle">Aadhaar Card</div>
+        <div class="upload-hint">PDF or Image • Max 5 MB</div>
+        <div class="upload-status"><span>✓</span> Uploaded</div>
+        <button class="remove-btn" title="Remove" aria-label="Remove file">✕</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="profileContinueBtn">
+      Continue to Eligibility Check →
+    </button>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 3: Scholarship Eligibility                            -->
+  <!-- ============================================================ -->
+  <section class="screen" id="screenEligibility" aria-labelledby="eligibilityHeading">
+
+    <!-- Eligibility Checking Animation -->
+    <div class="eligibility-checking" id="eligibilityChecking">
+      <div class="check-anim">
+        <div class="ring"></div>
+        <div class="center-icon">🔍</div>
+      </div>
+      <h2 style="font-size:1.15rem; margin-bottom:var(--space-2); color:var(--navy-800);">Checking Eligibility</h2>
+      <p style="font-size:0.85rem; color:var(--text-secondary);">Matching your profile against scholarship schemes…</p>
+      <ul class="check-steps" id="checkSteps">
+        <li class="active"><span class="li-icon">⏳</span> Verifying personal data</li>
+        <li><span class="li-icon">⏳</span> Checking academic records</li>
+        <li><span class="li-icon">⏳</span> Matching category criteria</li>
+        <li><span class="li-icon">⏳</span> Evaluating income eligibility</li>
+        <li><span class="li-icon">⏳</span> Finding matching scholarships</li>
+      </ul>
+    </div>
+
+    <!-- Results -->
+    <div id="eligibilityResults" style="display:none;">
+      <h2 id="eligibilityHeading" style="font-size:1.2rem; color:var(--navy-800); margin-bottom:var(--space-2);">Eligible Scholarships</h2>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:var(--space-6);">Based on your verified profile, you are eligible for the following schemes.</p>
+
+      <div id="scholarshipList">
+        <!-- Cards injected by JS -->
+      </div>
+
+      <!-- No results fallback -->
+      <div class="no-results" id="noResults" style="display:none;">
+        <div class="no-icon">📭</div>
+        <h3>No Eligible Scholarships Found</h3>
+        <p>You may update your profile or check again later as new schemes are released periodically.</p>
+        <button class="btn btn-outline mt-6" onclick="ScholarConnect.goToScreen(2)">Update Profile</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 4A: Scholarship Details                               -->
+  <!-- ============================================================ -->
+  <section class="screen" id="screenDetails" aria-labelledby="detailsHeading">
+    <div class="detail-page-header" id="detailHeader">
+      <h1 id="detailsHeading">—</h1>
+      <div class="dept" id="detailDept">—</div>
+      <div class="benefit-tag" id="detailBenefit">💰 —</div>
+    </div>
+
+    <div class="detail-section fade-in-up delay-1">
+      <h3><span class="section-emoji">🎯</span> Objective</h3>
+      <p id="detailObjective">—</p>
+    </div>
+
+    <div class="detail-section fade-in-up delay-2">
+      <h3><span class="section-emoji">✅</span> Eligibility Requirements</h3>
+      <ul id="detailEligibility"></ul>
+    </div>
+
+    <div class="detail-section fade-in-up delay-3">
+      <h3><span class="section-emoji">💰</span> Financial Benefits</h3>
+      <p id="detailBenefitsText">—</p>
+    </div>
+
+    <div class="detail-section fade-in-up delay-4">
+      <h3><span class="section-emoji">📎</span> Documents Required</h3>
+      <ul id="detailDocsRequired"></ul>
+    </div>
+
+    <div class="detail-section fade-in-up delay-4">
+      <h3><span class="section-emoji">📅</span> Important Dates</h3>
+      <table class="info-table" id="detailDates">
+        <tr><td>Last Date</td><td id="detailDeadline">—</td></tr>
+      </table>
+    </div>
+
+    <div class="detail-section fade-in-up delay-5">
+      <h3><span class="section-emoji">📜</span> Official Guidelines</h3>
+      <p id="detailGuidelines">—</p>
+    </div>
+
+    <div class="detail-section fade-in-up delay-5">
+      <h3><span class="section-emoji">❓</span> Frequently Asked Questions</h3>
+      <div id="detailFaqs"></div>
+    </div>
+
+    <button class="btn btn-primary" id="detailApplyBtn">Apply Now →</button>
+    <button class="btn btn-outline mt-4" id="detailBackBtn">← Back to Scholarships</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 4B: Apply for Scholarship                             -->
+  <!-- ============================================================ -->
+  <section class="screen" id="screenApply" aria-labelledby="applyHeading">
+    <h2 id="applyHeading" style="font-size:1.2rem; color:var(--navy-800); margin-bottom:var(--space-2);">Apply for Scholarship</h2>
+    <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:var(--space-6);" id="applyScholarshipName">—</p>
+
+    <!-- Pre-filled Info -->
+    <div class="section-card fade-in-up delay-1">
+      <div class="section-badge navy">
+        <span class="badge-icon">👤</span>
+        Applicant Details
+      </div>
+      <table class="info-table" id="applyInfoTable">
+        <!-- Rows injected by JS -->
+      </table>
+    </div>
+
+    <!-- Attached Documents -->
+    <div class="section-card fade-in-up delay-2">
+      <div class="section-badge green">
+        <span class="badge-icon">📎</span>
+        Attached Documents
+      </div>
+      <div id="applyDocs">
+        <!-- Rows injected by JS -->
+      </div>
+    </div>
+
+    <!-- Declaration -->
+    <div class="declaration-box fade-in-up delay-3">
+      <label>
+        <input type="checkbox" id="declarationCheck" />
+        I confirm that all information provided is true and correct to the best of my knowledge. I understand that providing false information may result in disqualification.
+      </label>
+    </div>
+
+    <button class="btn btn-success fade-in-up delay-4" id="submitApplicationBtn" disabled>
+      Submit Application
+    </button>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SCREEN 5: Success                                            -->
+  <!-- ============================================================ -->
+  <section class="screen" id="screenSuccess">
+    <div class="success-screen">
+      <div class="success-icon-wrap">🎉</div>
+      <h2>Application Submitted Successfully!</h2>
+      <p>Your scholarship application has been forwarded to the respective government portal. You will receive updates via SMS and within the app.</p>
+      <div class="success-ref" id="successRef">
+        📋 Ref: SC-2026-XXXXXX
+      </div>
+      <button class="btn btn-primary" id="goHomeBtn">Back to Home</button>
+    </div>
+  </section>
+
+  <!-- ========== Loading Overlay ========== -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Processing…</div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
